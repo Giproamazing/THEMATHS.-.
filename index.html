@@ -150,9 +150,31 @@
         }
 
         function generateEquation() {
-            const num1 = Math.floor(Math.random() * 100);
-            const num2 = Math.floor(Math.random() * 100);
-            return { equation: `${num1} + ${num2}`, answer: num1 + num2 };
+            const type = Math.floor(Math.random() * 3); // Randomly choose equation type
+            let equation = '';
+            let answer = 0;
+
+            if (type === 0) {
+                // Simple arithmetic
+                const num1 = Math.floor(Math.random() * 100);
+                const num2 = Math.floor(Math.random() * 100);
+                equation = `${num1} + ${num2}`;
+                answer = num1 + num2;
+            } else if (type === 1) {
+                // Algebra
+                const variable = String.fromCharCode(Math.floor(Math.random() * 26) + 97); // Random variable (a-z)
+                const coeff = Math.floor(Math.random() * 10) + 1;
+                const constant = Math.floor(Math.random() * 50);
+                equation = `${coeff}x + ${constant} = ${coeff + constant}`; // Example: 2x + 3 = 5
+                answer = coeff + constant; // The right side
+            } else {
+                // Calculus (simple derivative)
+                const func = 'x^2'; // For simplicity, using a fixed function
+                equation = `What is the derivative of ${func}?`;
+                answer = '2x'; // The derivative of x^2
+            }
+
+            return { equation, answer };
         }
 
         function loadNewEquation() {
