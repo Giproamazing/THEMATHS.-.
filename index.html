@@ -165,16 +165,12 @@
             };
         }
 
-        // Start button event listener
-        document.getElementById('start-button').onclick = initializeGame;
-
         // Check for saved Gmail address on page load
         window.onload = function() {
             const lastUser = localStorage.getItem('lastUser');
             if (lastUser) {
                 document.getElementById('email-input').value = lastUser;
-                // Optionally prompt the user to re-enter their email
-                alert("Please re-enter your Gmail to continue.");
+                initializeGame();
             }
         };
 
