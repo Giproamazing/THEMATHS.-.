@@ -80,17 +80,17 @@
 </head>
 <body>
     <div class="container">
-        <div id="user-input-section">
+        <div id="user-input-section" style="display:none;">
             <input type="text" id="email-input" placeholder="Enter your Gmail..." />
             <button id="start-button">Start</button>
             <div class="warning">Your provided actions will not be saved and will be instantly erased the second you leave the website.</div>
         </div>
-        <div class="progress-bar" id="progress-bar" style="display:none;"></div>
-        <div class="equation-box" id="equation-box" style="display:none;">Equation will appear here</div>
-        <input type="text" id="answer-input" placeholder="Type your answer..." style="display:none;" />
-        <div class="message" id="message" style="display:none;"></div>
-        <div class="progress-text" id="progress-text" style="display:none;">0/50,000 completed</div>
-        <div class="notifications" id="notifications" style="display:none;"></div>
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="equation-box" id="equation-box">Equation will appear here</div>
+        <input type="text" id="answer-input" placeholder="Type your answer..." />
+        <div class="message" id="message"></div>
+        <div class="progress-text" id="progress-text">0/50,000 completed</div>
+        <div class="notifications" id="notifications"></div>
         <div class="alert" id="refresh-alert">
             <p>Because you refreshed, we will take 2 points from you. Please don't refresh again!</p>
             <button id="refresh-confirm">Okay</button>
@@ -105,8 +105,10 @@
 
         // Function to initialize the game
         function initializeGame() {
-            currentUser = document.getElementById('email-input').value;
+            currentUser = sessionStorage.getItem('currentUser') || document.getElementById('email-input').value;
             if (currentUser) {
+                sessionStorage.setItem('currentUser', currentUser); // Store user session
+
                 // Load user's completed equations from localStorage
                 completedEquations = parseInt(localStorage.getItem(`${currentUser}_completedEquations`)) || 0;
 
@@ -126,9 +128,10 @@
                 // Check if the page was refreshed
                 if (sessionStorage.getItem('refreshed')) {
                     deductPointsForRefresh();
+                    sessionStorage.removeItem('refreshed'); // Remove flag after handling
                 }
             } else {
-                alert("Please enter a valid Gmail address.");
+                document.getElementById('user-input-section').style.display = 'block';
             }
         }
 
@@ -257,7 +260,11 @@
         window.onunload = function () {
             sessionStorage.removeItem('refreshed');
         };
+
+        // Initialize the game on page load
+        initializeGame();
     </script>
 </body>
 </html>
+
 
