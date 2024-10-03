@@ -150,7 +150,7 @@
         }
 
         function generateEquation() {
-            const type = Math.floor(Math.random() * 3); // Randomly choose equation type
+            const type = Math.floor(Math.random() * 5); // Randomly choose equation type
             let equation = '';
             let answer = 0;
 
@@ -161,17 +161,31 @@
                 equation = `${num1} + ${num2}`;
                 answer = num1 + num2;
             } else if (type === 1) {
-                // Algebra
-                const variable = String.fromCharCode(Math.floor(Math.random() * 26) + 97); // Random variable (a-z)
-                const coeff = Math.floor(Math.random() * 10) + 1;
-                const constant = Math.floor(Math.random() * 50);
-                equation = `${coeff}x + ${constant} = ${coeff + constant}`; // Example: 2x + 3 = 5
-                answer = coeff + constant; // The right side
+                // Hard subtraction
+                const num1 = Math.floor(Math.random() * 100) + 50; // Ensure a harder number
+                const num2 = Math.floor(Math.random() * 50);
+                equation = `${num1} - ${num2}`;
+                answer = num1 - num2;
+            } else if (type === 2) {
+                // Fractions
+                const numerator1 = Math.floor(Math.random() * 10) + 1; // 1 to 10
+                const denominator1 = Math.floor(Math.random() * 10) + 1; // 1 to 10
+                const numerator2 = Math.floor(Math.random() * 10) + 1; // 1 to 10
+                const denominator2 = Math.floor(Math.random() * 10) + 1; // 1 to 10
+                equation = `(${numerator1}/${denominator1}) + (${numerator2}/${denominator2})`;
+                answer = (numerator1 * denominator2 + numerator2 * denominator1) / (denominator1 * denominator2);
+            } else if (type === 3) {
+                // Integers
+                const num1 = Math.floor(Math.random() * 200) - 100; // Range -100 to 100
+                const num2 = Math.floor(Math.random() * 200) - 100; // Range -100 to 100
+                equation = `${num1} + ${num2}`;
+                answer = num1 + num2;
             } else {
-                // Calculus (simple derivative)
-                const func = 'x^2'; // For simplicity, using a fixed function
-                equation = `What is the derivative of ${func}?`;
-                answer = '2x'; // The derivative of x^2
+                // Integer subtraction (hard)
+                const num1 = Math.floor(Math.random() * 100) + 50; // Ensure a harder number
+                const num2 = Math.floor(Math.random() * 50);
+                equation = `${num1} - ${num2}`;
+                answer = num1 - num2;
             }
 
             return { equation, answer };
