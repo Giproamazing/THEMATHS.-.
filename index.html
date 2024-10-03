@@ -43,117 +43,35 @@
             font-size: 18px;
         }
 
-        .notifications {
-            margin-top: 20px;
-            text-align: left;
-            max-height: 150px;
-            overflow-y: auto;
-            padding: 10px;
-            border: 1px solid grey;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .notification {
-            margin: 5px 0;
-        }
-
-        .warning {
-            color: grey;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .alert {
-            background-color: rgba(255, 0, 0, 0.8);
-            padding: 10px;
-            margin: 20px 0;
+        .alert-box {
             display: none;
-        }
-
-        .alert button {
-            background-color: yellow;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
+            background-color: red;
+            padding: 10px;
+            color: white;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="user-input-section" style="display:none;">
-            <input type="text" id="email-input" placeholder="Enter your Gmail..." />
-            <button id="start-button">Start</button>
-            <div class="warning">Your provided actions will not be saved and will be instantly erased the second you leave the website.</div>
-        </div>
+        <div id="refresh-alert" class="alert-box">Because you refreshed, we took 2 points. Please don't refresh again!</div>
         <div class="progress-bar" id="progress-bar"></div>
         <div class="equation-box" id="equation-box">Equation will appear here</div>
         <input type="text" id="answer-input" placeholder="Type your answer..." />
         <div class="message" id="message"></div>
         <div class="progress-text" id="progress-text">0/50,000 completed</div>
-        <div class="notifications" id="notifications"></div>
-        <div class="alert" id="refresh-alert">
-            <p>Because you refreshed, we will take 2 points from you. Please don't refresh again!</p>
-            <button id="refresh-confirm">Okay</button>
-        </div>
     </div>
 
     <script>
         const totalEquations = 50000;
-        let completedEquations = 0;
-        let currentUser = '';
-        let refreshed = false; // Track if the user refreshed
-
-        // Function to initialize the game
-        function initializeGame() {
-            currentUser = sessionStorage.getItem('currentUser') || document.getElementById('email-input').value;
-            if (currentUser) {
-                sessionStorage.setItem('currentUser', currentUser); // Store user session
-
-                // Load user's completed equations from localStorage
-                completedEquations = parseInt(localStorage.getItem(`${currentUser}_completedEquations`)) || 0;
-
-                // Hide user input section
-                document.getElementById('user-input-section').style.display = 'none';
-                document.getElementById('progress-bar').style.display = 'block';
-                document.getElementById('equation-box').style.display = 'block';
-                document.getElementById('answer-input').style.display = 'block';
-                document.getElementById('message').style.display = 'block';
-                document.getElementById('progress-text').style.display = 'block';
-                document.getElementById('notifications').style.display = 'block';
-
-                updateProgressBar();
-                loadNewEquation();
-                updateNotifications();
-
-                // Check if the page was refreshed
-                if (sessionStorage.getItem('refreshed')) {
-                    deductPointsForRefresh();
-                    sessionStorage.removeItem('refreshed'); // Remove flag after handling
-                }
-            } else {
-                document.getElementById('user-input-section').style.display = 'block';
-            }
-        }
-
-        // Deduct points for refreshing the page
-        function deductPointsForRefresh() {
-            if (completedEquations > 0) {
-                completedEquations = Math.max(0, completedEquations - 2); // Deduct 2 points
-                localStorage.setItem(`${currentUser}_completedEquations`, completedEquations); // Save progress
-                updateProgressBar();
-                showRefreshAlert();
-            }
-        }
-
-        // Show the refresh alert message
-        function showRefreshAlert() {
-            document.getElementById('refresh-alert').style.display = 'block';
-        }
-
-        function updateNotifications() {
-            const notificationsDiv = document.getElementById('notifications');
-            notificationsDiv.innerHTML = ''; // Clear previous notifications
-            notificationsDiv.innerHTML += `<div class="notification">${currentUser} (${completedEquations})</div>`;
+        let completedEquations = parseInt(localStorage.getItem('completedEquations')) || 0; // Load progress tied to name
+        let refreshed = sessionStorage.getItem('refreshed');
+        
+        // Check if refreshed
+        if (refreshed) {
+            completedEquations = Math.max(completedEquations - 2, 0); // Deduct 2 points
+            sessionStorage.removeItem('refreshed');
+            document.getElementById('refresh-alert').style.display = 'block'; // Show alert
         }
 
         function updateProgressBar() {
@@ -161,7 +79,7 @@
             const percentage = (completedEquations / totalEquations) * 100;
             progressBar.style.width = percentage + '%';
 
-            // Update the text to show progress
+            // Update text to show progress
             document.getElementById('progress-text').innerText = `${completedEquations}/50,000 completed`;
 
             // Change progress bar color to yellow when an equation is completed
@@ -179,55 +97,35 @@
 
             if (parseInt(input.value) === correctAnswer) {
                 completedEquations++;
-                localStorage.setItem(`${currentUser}_completedEquations`, completedEquations); // Save progress
+                localStorage.setItem('completedEquations', completedEquations); // Save progress
                 message.innerText = "Correct! Next equation...";
                 input.value = '';
                 loadNewEquation();
-                updateProgressBar(); // Update the progress bar after incrementing
-                updateNotifications(); // Update notifications display
+                updateProgressBar(); // Update progress after incrementing
             } else {
                 message.innerText = "Try again!";
             }
         }
 
         function generateEquation() {
-            let equation = '';
-            let answer = 0;
+            const num1 = Math.floor(Math.random() * 100);
+            const num2 = Math.floor(Math.random() * 100);
+            let equation, answer;
 
-            const type = Math.floor(Math.random() * 5); // Randomly choose equation type
-
-            if (type === 0) {
-                // Simple arithmetic
-                const num1 = Math.floor(Math.random() * 100);
-                const num2 = Math.floor(Math.random() * 100);
+            const rand = Math.random();
+            if (rand < 0.25) {
                 equation = `${num1} + ${num2}`;
                 answer = num1 + num2;
-            } else if (type === 1) {
-                // Hard subtraction
-                const num1 = Math.floor(Math.random() * 100) + 50; // Ensure a harder number
-                const num2 = Math.floor(Math.random() * 50);
+            } else if (rand < 0.5) {
                 equation = `${num1} - ${num2}`;
                 answer = num1 - num2;
-            } else if (type === 2) {
-                // Fractions
-                const numerator1 = Math.floor(Math.random() * 10) + 1; // 1 to 10
-                const denominator1 = Math.floor(Math.random() * 10) + 1; // 1 to 10
-                const numerator2 = Math.floor(Math.random() * 10) + 1; // 1 to 10
-                const denominator2 = Math.floor(Math.random() * 10) + 1; // 1 to 10
-                equation = `(${numerator1}/${denominator1}) + (${numerator2}/${denominator2})`;
-                answer = (numerator1 * denominator2 + numerator2 * denominator1) / (denominator1 * denominator2);
-            } else if (type === 3) {
-                // Integers
-                const num1 = Math.floor(Math.random() * 200) - 100; // Range -100 to 100
-                const num2 = Math.floor(Math.random() * 200) - 100; // Range -100 to 100
-                equation = `${num1} + ${num2}`;
-                answer = num1 + num2;
+            } else if (rand < 0.75) {
+                const num3 = Math.floor(Math.random() * 10) + 1; // Fractions
+                equation = `(${num1}/${num3}) * ${num2}`;
+                answer = (num1 / num3) * num2;
             } else {
-                // Integer subtraction (hard)
-                const num1 = Math.floor(Math.random() * 100) + 50; // Ensure a harder number
-                const num2 = Math.floor(Math.random() * 50);
-                equation = `${num1} - ${num2}`;
-                answer = num1 - num2;
+                equation = `Solve for x: ${num1}x + ${num2} = 0`; // Algebra
+                answer = -num2 / num1;
             }
 
             return { equation, answer };
@@ -243,28 +141,15 @@
             };
         }
 
-        // Refresh alert button action
-        document.getElementById('refresh-confirm').onclick = function () {
-            document.getElementById('refresh-alert').style.display = 'none'; // Hide alert
-        };
-
-        // Start button
-        document.getElementById('start-button').onclick = initializeGame;
-
         // Track refresh
         window.onbeforeunload = function () {
             sessionStorage.setItem('refreshed', true);
         };
 
-        // Clear sessionStorage if user leaves the page
-        window.onunload = function () {
-            sessionStorage.removeItem('refreshed');
-        };
-
-        // Initialize the game on page load
-        initializeGame();
+        // Initialize game and load first equation
+        loadNewEquation();
+        updateProgressBar();
     </script>
 </body>
 </html>
-
 
