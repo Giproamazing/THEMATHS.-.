@@ -93,7 +93,7 @@
         <div class="notifications" id="notifications" style="display:none;"></div>
         <div class="alert" id="refresh-alert">
             <p>Because you refreshed, we will take 2 points from you. Please don't refresh again!</p>
-            <button id="refresh-confirm">Refresh</button>
+            <button id="refresh-confirm">Okay</button>
         </div>
     </div>
 
@@ -101,8 +101,7 @@
         const totalEquations = 50000;
         let completedEquations = 0;
         let currentUser = '';
-        let refreshCount = 0; // Track the number of page refreshes
-        const pointsDeduction = 2; // Points to deduct on refresh
+        let refreshed = false; // Track if the user refreshed
 
         // Function to initialize the game
         function initializeGame() {
@@ -123,12 +122,31 @@
                 updateProgressBar();
                 loadNewEquation();
                 updateNotifications();
+
+                // Check if the page was refreshed
+                if (sessionStorage.getItem('refreshed')) {
+                    deductPointsForRefresh();
+                }
             } else {
                 alert("Please enter a valid Gmail address.");
             }
         }
 
-        // Update user notifications
+        // Deduct points for refreshing the page
+        function deductPointsForRefresh() {
+            if (completedEquations > 0) {
+                completedEquations = Math.max(0, completedEquations - 2); // Deduct 2 points
+                localStorage.setItem(`${currentUser}_completedEquations`, completedEquations); // Save progress
+                updateProgressBar();
+                showRefreshAlert();
+            }
+        }
+
+        // Show the refresh alert message
+        function showRefreshAlert() {
+            document.getElementById('refresh-alert').style.display = 'block';
+        }
+
         function updateNotifications() {
             const notificationsDiv = document.getElementById('notifications');
             notificationsDiv.innerHTML = ''; // Clear previous notifications
@@ -222,25 +240,23 @@
             };
         }
 
-        // Refresh handler
-        window.onbeforeunload = function () {
-            refreshCount++;
-            if (refreshCount > 0) {
-                completedEquations -= pointsDeduction; // Deduct points
-                localStorage.setItem(`${currentUser}_completedEquations`, completedEquations); // Save progress
-                document.getElementById('refresh-alert').style.display = 'block'; // Show refresh alert
-                return "Are you sure you want to refresh? You will lose 2 points!";
-            }
-        };
-
-        // Button to confirm refresh
+        // Refresh alert button action
         document.getElementById('refresh-confirm').onclick = function () {
-            location.reload();
+            document.getElementById('refresh-alert').style.display = 'none'; // Hide alert
         };
 
         // Start button
         document.getElementById('start-button').onclick = initializeGame;
 
+        // Track refresh
+        window.onbeforeunload = function () {
+            sessionStorage.setItem('refreshed', true);
+        };
+
+        // Clear sessionStorage if user leaves the page
+        window.onunload = function () {
+            sessionStorage.removeItem('refreshed');
+        };
     </script>
 </body>
 </html>
